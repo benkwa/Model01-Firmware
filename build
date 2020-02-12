@@ -1,0 +1,9 @@
+#!/bin/bash
+
+VERSION=$( git describe )
+
+if ! git diff-index --quiet HEAD --; then
+    VERSION="${VERSION}*"
+fi
+
+make "$@" LOCAL_CFLAGS='-DBUILD_INFORMATION="'$VERSION'"'
