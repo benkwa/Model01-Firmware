@@ -88,8 +88,7 @@
   *
   * The second usage is in the 'switch' statement in the `macroAction` function.
   * That switch statement actually runs the code associated with a macro when
-  * a macro key is pressed.
-  */
+  * a macro key is pressed.  */
 
 enum { MACRO_VERSION_INFO,
        MACRO_ARROW,
@@ -158,20 +157,6 @@ enum {
 #define Key_LeftCurly    Key_LeftCurlyBracket
 #define Key_RightCurly   Key_RightCurlyBracket
 
-// #define OSX 1
-
-// #if OSX
-// #define BK_L_Control CTL_T(Key_Backspace)
-// #define BK_L_Command GUI_T(Delete)
-// #define BK_R_Control CTL_T(Key_Spacebar)
-// #define BK_R_Command GUI_T(Enter)
-// #else
-// #define BK_L_Control CTL_T(Key_Backspace)
-// #define BK_L_Command GUI_T(Delete)
-// #define BK_R_Control CTL_T(Key_Spacebar)
-// #define BK_R_Command GUI_T(Enter)
-// #endif
-
 /* This comment temporarily turns off astyle's indent enforcement
  *   so we can make the keymaps actually resemble the physical key layout better
  */
@@ -182,7 +167,7 @@ KEYMAPS(
   [PRIMARY] = KEYMAP_STACKED(
           // Left Hand
           Key_Equals,    Key_1, Key_2, Key_3, Key_4, Key_5, Key_Escape,
-          Key_CapsLock,  Key_Q, Key_W, Key_E, Key_R, Key_T, ___,
+          Key_CapsLock,  Key_Q, Key_W, Key_E, Key_R, Key_T, Key_LEDEffectNext,
           Key_Tab,       Key_A, Key_S, Key_D, Key_F, Key_G,
           Key_LeftShift, Key_Z, Key_X, Key_C, Key_V, Key_B, Key_Hyper,
 
@@ -202,7 +187,7 @@ KEYMAPS(
 
 
   [SYMBOL] =  KEYMAP_STACKED(
-          Key_Backtick,  Key_F1,  Key_F2,  Key_F3,  Key_F4,  Key_F5,  ___,
+          Key_Backtick,  Key_F1,  Key_F2,  Key_F3,  Key_F4,  Key_F5,  M(MACRO_VERSION_INFO),
           ___, ___, ___, ___, ___, ___, ___,
           ___, ___, ___, ___, ___, ___,
           ___, ___, ___, ___, ___, ___, ___,
@@ -211,7 +196,7 @@ KEYMAPS(
 
           ___,          Key_F6,        Key_F7,        Key_F8,         Key_F9,          Key_F10,          ___,
           ___,          ___,           Key_LeftCurly, Key_RightCurly, Key_LeftBracket, Key_RightBracket, ___,
-                        Key_LeftArrow, Key_DownArrow, Key_UpArrow,    Key_RightArrow,  ___,              ___,
+                        Key_LeftArrow, Key_DownArrow, Key_UpArrow,    Key_RightArrow,  ___,              __,
           Key_LeftGui,  ___,           ___,           Key_8,          M(MACRO_ARROW),  ___,              ___,
           ___, ___, ___, ___,
           ___),
@@ -383,7 +368,10 @@ enum {
   // mode.
   COMBO_TOGGLE_NKRO_MODE,
   // Enter test mode
-  COMBO_ENTER_TEST_MODE
+  COMBO_ENTER_TEST_MODE,
+  // Mouse to left/right display
+  COMBO_MOUSE_SCREEN_LEFT,
+  COMBO_MOUSE_SCREEN_RIGHT,
 };
 
 /** Wrappers, to be used by MagicCombo. **/
@@ -403,18 +391,46 @@ static void enterHardwareTestMode(uint8_t combo_index) {
   HardwareTestMode.runTests();
 }
 
+static void mouseScreenLeft(uint8_t combo_index) {
+    Kaleidoscope.hid().absoluteMouse().moveTo(0, MAX_WARP_HEIGHT/2, 0);
+    Kaleidoscope.hid().mouse().move(-1, 0, 0);
+    Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH/2, MAX_WARP_HEIGHT/2, 0);
+    kaleidoscope::plugin::MouseWrapper_::end_warping();
+}
+
+static void mouseScreenRight(uint8_t combo_index) {
+    Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH, MAX_WARP_HEIGHT/2, 0);
+    Kaleidoscope.hid().mouse().move(1, 0, 0);
+    Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH/2, MAX_WARP_HEIGHT/2, 0);
+    kaleidoscope::plugin::MouseWrapper_::end_warping();
+}
 
 /** Magic combo list, a list of key combo and action pairs the firmware should
  * recognise.
  */
-USE_MAGIC_COMBOS({.action = toggleKeyboardProtocol,
-                  // Left Fn + Esc + Shift
-                  .keys = { R3C6, R2C6, R3C7 }
-}, {
-  .action = enterHardwareTestMode,
-  // Left Fn + Prog + LED
-  .keys = { R3C6, R0C0, R0C6 }
-});
+USE_MAGIC_COMBOS(
+    [COMBO_TOGGLE_NKRO_MODE] = {
+                                .action = toggleKeyboardProtocol,
+                                // Left Fn + Esc + Shift
+                                .keys = { R3C6, R2C6, R3C7 }
+    },
+    [COMBO_ENTER_TEST_MODE] = {
+                               .action = enterHardwareTestMode,
+                               // Left Fn + Prog + LED
+                               .keys = { R3C6, R0C0, R0C6 }
+    },
+    [COMBO_MOUSE_SCREEN_LEFT] = {
+                                 .action = mouseScreenLeft,
+                                 // Hyper + MouseKeys + J
+                                 .keys = { R2C6, R2C9, R2C11 }
+    },
+    [COMBO_MOUSE_SCREEN_RIGHT] = {
+                                 .action = mouseScreenRight,
+                                 // Hyper + MouseKeys + K
+                                 .keys = { R2C6, R2C9, R2C12 }
+    },
+
+);
 
 // First, tell Kaleidoscope which plugins you want to use.
 // The order can be important. For example, LED effects are
