@@ -89,6 +89,8 @@
 
 enum { MACRO_VERSION_INFO,
        MACRO_ARROW,
+       MACRO_MOUSE_SCREEN_L,
+       MACRO_MOUSE_SCREEN_R,
      };
 
 
@@ -151,6 +153,8 @@ enum {
 // Aliases for readability
 #define Key_LeftCurly    Key_LeftCurlyBracket
 #define Key_RightCurly   Key_RightCurlyBracket
+#define Mouse_ScrnL      M(MACRO_MOUSE_SCREEN_L)
+#define Mouse_ScrnR      M(MACRO_MOUSE_SCREEN_R)
 
 /* This comment temporarily turns off astyle's indent enforcement
  *   so we can make the keymaps actually resemble the physical key layout better
@@ -198,7 +202,7 @@ KEYMAPS(
 
 
   [MOUSE] =  KEYMAP_STACKED(
-          ___, ___, ___,          ___,         ___,          ___, ___,
+          ___, ___, Mouse_ScrnL,  Mouse_ScrnR, ___,          ___, ___,
           ___, ___, Key_mouseUpL, Key_mouseUp, Key_mouseUpR, ___, ___,
           ___, ___, Key_mouseL,   Key_mouseDn, Key_mouseR,   ___,
           ___, ___, Key_mouseDnL, ___,         Key_mouseDnR, ___, ___,
@@ -241,16 +245,34 @@ KEYMAPS(
  */
 
 static void versionInfoMacro(uint8_t keyState) {
-  if (keyToggledOn(keyState)) {
-    Macros.type(PSTR("Keyboardio Model 01 - Kaleidoscope "));
-    Macros.type(PSTR(BUILD_INFORMATION));
-  }
+    if (keyToggledOn(keyState)) {
+        Macros.type(PSTR("Keyboardio Model 01 - Kaleidoscope "));
+        Macros.type(PSTR(BUILD_INFORMATION));
+    }
 }
 
 
 static void arrowOperatorMacro(uint8_t keyState) {
     if (keyToggledOn(keyState)) {
         Macros.type(PSTR("->"));
+    }
+}
+
+static void mouseScreenLeft(uint8_t keyState) {
+    if (keyToggledOn(keyState)) {
+        Kaleidoscope.hid().absoluteMouse().moveTo(0, MAX_WARP_HEIGHT/2, 0);
+        Kaleidoscope.hid().mouse().move(-1, 0, 0);
+        Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH/2, MAX_WARP_HEIGHT/2, 0);
+        kaleidoscope::plugin::MouseWrapper_::end_warping();
+    }
+}
+
+static void mouseScreenRight(uint8_t keyState) {
+    if (keyToggledOn(keyState)) {
+        Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH, MAX_WARP_HEIGHT/2, 0);
+        Kaleidoscope.hid().mouse().move(1, 0, 0);
+        Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH/2, MAX_WARP_HEIGHT/2, 0);
+        kaleidoscope::plugin::MouseWrapper_::end_warping();
     }
 }
 
@@ -270,12 +292,20 @@ const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
   switch (macroIndex) {
 
   case MACRO_VERSION_INFO:
-    versionInfoMacro(keyState);
-    break;
+      versionInfoMacro(keyState);
+      break;
 
   case MACRO_ARROW:
-    arrowOperatorMacro(keyState);
-    break;
+      arrowOperatorMacro(keyState);
+      break;
+
+  case MACRO_MOUSE_SCREEN_L:
+      mouseScreenLeft(keyState);
+      break;
+
+  case MACRO_MOUSE_SCREEN_L:
+      mouseScreenRight(keyState);
+      break;
   }
 
   return MACRO_NONE;
@@ -333,9 +363,6 @@ enum {
   COMBO_TOGGLE_NKRO_MODE,
   // Enter test mode
   COMBO_ENTER_TEST_MODE,
-  // Mouse to left/right display
-  COMBO_MOUSE_SCREEN_LEFT,
-  COMBO_MOUSE_SCREEN_RIGHT,
 };
 
 /** Wrappers, to be used by MagicCombo. **/
@@ -355,20 +382,6 @@ static void enterHardwareTestMode(uint8_t combo_index) {
   HardwareTestMode.runTests();
 }
 
-static void mouseScreenLeft(uint8_t combo_index) {
-    Kaleidoscope.hid().absoluteMouse().moveTo(0, MAX_WARP_HEIGHT/2, 0);
-    Kaleidoscope.hid().mouse().move(-1, 0, 0);
-    Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH/2, MAX_WARP_HEIGHT/2, 0);
-    kaleidoscope::plugin::MouseWrapper_::end_warping();
-}
-
-static void mouseScreenRight(uint8_t combo_index) {
-    Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH, MAX_WARP_HEIGHT/2, 0);
-    Kaleidoscope.hid().mouse().move(1, 0, 0);
-    Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH/2, MAX_WARP_HEIGHT/2, 0);
-    kaleidoscope::plugin::MouseWrapper_::end_warping();
-}
-
 /** Magic combo list, a list of key combo and action pairs the firmware should
  * recognise.
  */
@@ -383,17 +396,6 @@ USE_MAGIC_COMBOS(
                                // Left Fn + Prog + LED
                                .keys = { R3C6, R0C0, R0C6 }
     },
-    [COMBO_MOUSE_SCREEN_LEFT] = {
-                                 .action = mouseScreenLeft,
-                                 // Hyper + MouseKeys + J
-                                 .keys = { R2C6, R2C9, R2C11 }
-    },
-    [COMBO_MOUSE_SCREEN_RIGHT] = {
-                                 .action = mouseScreenRight,
-                                 // Hyper + MouseKeys + K
-                                 .keys = { R2C6, R2C9, R2C12 }
-    },
-
 );
 
 // First, tell Kaleidoscope which plugins you want to use.
