@@ -202,14 +202,14 @@ KEYMAPS(
 
 
   [MOUSE] =  KEYMAP_STACKED(
-          ___, ___, Mouse_ScrnL,  Mouse_ScrnR, ___,          ___, ___,
+          ___, ___, ___,          ___,         ___,          ___, ___,
           ___, ___, Key_mouseUpL, Key_mouseUp, Key_mouseUpR, ___, ___,
           ___, ___, Key_mouseL,   Key_mouseDn, Key_mouseR,   ___,
           ___, ___, Key_mouseDnL, ___,         Key_mouseDnR, ___, ___,
           ___, ___, ___, ___,
           ___,
 
-          ___, ___,              ___            , ___            , ___          , ___,           ___,
+          ___, ___,              Mouse_ScrnL,     Mouse_ScrnR    , ___          , ___,           ___,
           ___, Key_mouseWarpEnd, Key_mouseWarpNW, Key_mouseWarpNE, Key_mouseBtnL, Key_mouseBtnR, ___,
                ___,              Key_mouseWarpSW, Key_mouseWarpSE, ___,           ___,           ___,
           ___, ___,              ___,             ___,             ___,           ___,           ___,
@@ -261,7 +261,7 @@ static void arrowOperatorMacro(uint8_t keyState) {
 static void mouseScreenLeft(uint8_t keyState) {
     if (keyToggledOn(keyState)) {
         Kaleidoscope.hid().absoluteMouse().moveTo(0, MAX_WARP_HEIGHT/2, 0);
-        Kaleidoscope.hid().mouse().move(-1, 0, 0);
+        Kaleidoscope.hid().mouse().move(-10, 0, 0, 0);
         Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH/2, MAX_WARP_HEIGHT/2, 0);
         kaleidoscope::plugin::MouseWrapper_::end_warping();
     }
@@ -270,7 +270,7 @@ static void mouseScreenLeft(uint8_t keyState) {
 static void mouseScreenRight(uint8_t keyState) {
     if (keyToggledOn(keyState)) {
         Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH, MAX_WARP_HEIGHT/2, 0);
-        Kaleidoscope.hid().mouse().move(1, 0, 0);
+        Kaleidoscope.hid().mouse().move(10, 0, 0, 0);
         Kaleidoscope.hid().absoluteMouse().moveTo(MAX_WARP_WIDTH/2, MAX_WARP_HEIGHT/2, 0);
         kaleidoscope::plugin::MouseWrapper_::end_warping();
     }
@@ -303,7 +303,7 @@ const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
       mouseScreenLeft(keyState);
       break;
 
-  case MACRO_MOUSE_SCREEN_L:
+  case MACRO_MOUSE_SCREEN_R:
       mouseScreenRight(keyState);
       break;
   }
