@@ -168,7 +168,7 @@ KEYMAPS(
           Key_Equals,    Key_1, Key_2, Key_3, Key_4, Key_5, Key_Escape,
           Key_CapsLock,  Key_Q, Key_W, Key_E, Key_R, Key_T, Key_LEDEffectNext,
           Key_Tab,       Key_A, Key_S, Key_D, Key_F, Key_G,
-          Key_LeftShift, Key_Z, Key_X, Key_C, Key_V, Key_B, Key_Hyper,
+          Key_LeftShift, Key_Z, Key_X, Key_C, Key_V, Key_B, Key_Meh,
 
           CTL_T(Backspace), ALT_T(Delete), GUI_T(Home), Key_End,
           ShiftToLayer(SYMBOL),
