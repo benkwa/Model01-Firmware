@@ -71,6 +71,7 @@ enum {
     MACRO_ARROW,
     MACRO_MOUSE_SCREEN_L,
     MACRO_MOUSE_SCREEN_R,
+    MACRO_CTRL_K,
 };
 
 
@@ -178,7 +179,7 @@ KEYMAPS(
           LALT(Key_Tab),       LALT(Key_A), LALT(Key_S), DelWord,     ForWord,     LALT(Key_G),
           LALT(Key_LeftShift), LALT(Key_Z), LALT(Key_X), LALT(Key_C), LALT(Key_V), BackWord,    ___,
 
-          CTL_T(Backspace), ALT_T(Delete), GUI_T(Home), LALT(Key_End),
+          LALT(Key_Backspace), LALT(Key_Delete), LALT(Key_Home), LALT(Key_End),
           ShiftToLayer(SYMBOL),
 
 
@@ -188,29 +189,29 @@ KEYMAPS(
                LALT(Key_H), LALT(Key_J), LALT(Key_K),     LALT(Key_L),      LALT(Key_Semicolon), LALT(Key_Quote),
           ___, LALT(Key_N), LALT(Key_M), LALT(Key_Comma), LALT(Key_Period), LALT(Key_Slash),     LALT(Key_RightShift),
 
-          LALT(Key_PageDown), GUI_T(PageUp), ALT_T(Enter), CTL_T(Spacebar),
+          LALT(Key_PageDown), LALT(Key_PageUp), ALT_T(Enter), LALT(Key_Spacebar),
           ShiftToLayer(SYMBOL)
     ),
 
 
   [CTRL] = KEYMAP_STACKED(
           // Left Hand
-          LCTRL(Key_Equals),    LCTRL(Key_1), LCTRL(Key_2), LCTRL(Key_3), LCTRL(Key_4), LCTRL(Key_5), LCTRL(Key_Escape),
-          LCTRL(Key_CapsLock),  LCTRL(Key_Q), LCTRL(Key_X), Key_End,      LCTRL(Key_R), LCTRL(Key_T), ___,
-          LCTRL(Key_Tab),       Key_Home,     LCTRL(Key_S), LCTRL(Key_D), LCTRL(Key_F), LCTRL(Key_G),
-          LCTRL(Key_LeftShift), LCTRL(Key_Z), LCTRL(Key_X), LCTRL(Key_C), LCTRL(Key_V), LCTRL(Key_B), ___,
+          LCTRL(Key_Equals),    LCTRL(Key_1), LCTRL(Key_2), LCTRL(Key_3), LCTRL(Key_4),   LCTRL(Key_5),  LCTRL(Key_Escape),
+          LCTRL(Key_CapsLock),  LCTRL(Key_Q), LCTRL(Key_X), Key_End,      LCTRL(Key_R),   LCTRL(Key_T),  ___,
+          LCTRL(Key_Tab),       Key_Home,     LCTRL(Key_S), LCTRL(Key_D), Key_RightArrow, LCTRL(Key_G),
+          LCTRL(Key_LeftShift), LCTRL(Key_Z), LCTRL(Key_X), LCTRL(Key_C), LCTRL(Key_V),   Key_LeftArrow, ___,
 
-          CTL_T(Backspace), ALT_T(Delete), GUI_T(Home), LCTRL(Key_End),
+          ___, LCTRL(Key_Delete), LCTRL(Key_Home), LCTRL(Key_End),
           ShiftToLayer(SYMBOL),
 
 
           // Right Hand
           ___, LCTRL(Key_6),  LCTRL(Key_7), LCTRL(Key_8),     LCTRL(Key_9),      LCTRL(Key_0),         LCTRL(Key_Minus),
           ___, LCTRL(Key_V),  LCTRL(Key_U), LCTRL(Key_I),     LCTRL(Key_O),      Key_UpArrow,          LCTRL(Key_Backslash),
-               LCTRL(Key_H),  LCTRL(Key_J), LCTRL(Key_K),     LCTRL(Key_L),      LCTRL(Key_Semicolon), LCTRL(Key_Quote),
+               LCTRL(Key_H),  LCTRL(Key_J), M(MACRO_CTRL_K),  LCTRL(Key_L),      LCTRL(Key_Semicolon), LCTRL(Key_Quote),
           ___, Key_DownArrow, LCTRL(Key_M), LCTRL(Key_Comma), LCTRL(Key_Period), LCTRL(Key_Slash),     LCTRL(Key_RightShift),
 
-          LCTRL(Key_PageDown), GUI_T(PageUp), ALT_T(Enter), CTL_T(Spacebar),
+          LCTRL(Key_PageDown), LCTRL(Key_PageUp), LCTRL(Key_Enter), LCTRL(Key_Spacebar),
           ShiftToLayer(SYMBOL)
     ),
 
@@ -292,6 +293,14 @@ static void arrowOperatorMacro(uint8_t keyState) {
     }
 }
 
+static void ctrlKMacro(uint8_t keyState) {
+    if (keyToggledOn(keyState)) {
+        Macros.play(MACRO(D(LeftShift), T(End), U(LeftShift), T(Backspace)));
+    }
+}
+
+// TODO: add a Ctrl-K macro
+
 /** macroAction dispatches keymap events that are tied to a macro
     to that macro. It takes two uint8_t parameters.
 
@@ -315,6 +324,9 @@ const macro_t *macroAction(uint8_t macroIndex, uint8_t keyState) {
       arrowOperatorMacro(keyState);
       break;
 
+  case MACRO_CTRL_K:
+      ctrlKMacro(keyState);
+      break;
   }
 
   return MACRO_NONE;
