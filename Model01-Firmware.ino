@@ -53,6 +53,8 @@
 
 #include "Kaleidoscope-Qukeys.h"
 
+#include "Kaleidoscope-OneShot.h"
+
 
 /** This 'enum' is a list of all the macros used by the Model 01's firmware
   * The names aren't particularly important. What is important is that each
@@ -69,8 +71,6 @@
 enum {
     MACRO_VERSION_INFO,
     MACRO_ARROW,
-    MACRO_MOUSE_SCREEN_L,
-    MACRO_MOUSE_SCREEN_R,
     MACRO_CTRL_K,
 };
 
@@ -126,22 +126,31 @@ enum {
 
 enum {
     PRIMARY,
+    EMACS,
     ALT,
     CTRL,
     SYMBOL,
     MOUSE,
+    WM0,
+    WM1,
 }; // layers
 
 
 // Aliases for readability
 #define Key_LeftCurly    Key_LeftCurlyBracket
 #define Key_RightCurly   Key_RightCurlyBracket
-#define Mouse_ScrnL      M(MACRO_MOUSE_SCREEN_L)
-#define Mouse_ScrnR      M(MACRO_MOUSE_SCREEN_R)
 
 #define BackWord LCTRL(Key_LeftArrow)
 #define ForWord LCTRL(Key_RightArrow)
 #define DelWord LCTRL(Key_Delete)
+
+#define Key_WsLeft  MEH(Key_W)
+#define Key_WsRight MEH(Key_R)
+#define Key_WmLeft  MEH(Key_S)
+#define Key_WmRight MEH(Key_F)
+#define Key_WmMaxT  MEH(Key_E)
+#define Key_WmMaxL  MEH(Key_S)
+#define Key_WmMaxR  MEH(Key_F)
 
 /* This comment temporarily turns off astyle's indent enforcement
  *   so we can make the keymaps actually resemble the physical key layout better
@@ -157,21 +166,39 @@ KEYMAPS(
           Key_Tab,       Key_A, Key_S, Key_D, Key_F, Key_G,
           Key_LeftShift, Key_Z, Key_X, Key_C, Key_V, Key_B, Key_Meh,
 
-          LT(CTRL, Backspace), ALT_T(Delete), CTL_T(Home), Key_End,
+          CTL_T(Backspace), ALT_T(Delete), CTL_T(Home), Key_End,
           ShiftToLayer(SYMBOL),
 
 
           // Right Hand
           ___,                 Key_6, Key_7, Key_8,     Key_9,         Key_0,         Key_Minus,
-          ___,                 Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Backslash,
+          LockLayer(EMACS),    Key_Y, Key_U, Key_I,     Key_O,         Key_P,         Key_Backslash,
                                Key_H, Key_J, Key_K,     Key_L,         Key_Semicolon, Key_Quote,
           ShiftToLayer(MOUSE), Key_N, Key_M, Key_Comma, Key_Period,    Key_Slash,     Key_RightShift,
 
-          Key_PageDown, CTL_T(PageUp), LT(ALT, Enter), CTL_T(Spacebar),
+          Key_PageDown, CTL_T(PageUp), ALT_T(Enter), CTL_T(Spacebar),
           ShiftToLayer(SYMBOL)
     ),
 
 
+  // Emacs emulation - map L_CTL and R_ALT to layers that emulate emacs navigation keys
+  [EMACS] =  KEYMAP_STACKED
+  (___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+   LT(CTRL, Backspace), ___, ___, ___,
+   ___,
+
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+        ___, ___, ___, ___, ___, ___,
+   ___, ___, ___, ___, ___, ___, ___,
+   ___, ___, LT(ALT, Enter), ___,
+   ___),
+
+
+  // Emacs emulation - map alt keys to forward/backward/delete word
   [ALT] = KEYMAP_STACKED(
           // Left Hand
           LALT(Key_Equals),    LALT(Key_1), LALT(Key_2), LALT(Key_3), LALT(Key_4), LALT(Key_5), LALT(Key_Escape),
@@ -194,6 +221,7 @@ KEYMAPS(
     ),
 
 
+  // Emacs emulation - map ctrl keys to arrow/home/end/etc
   [CTRL] = KEYMAP_STACKED(
           // Left Hand
           LCTRL(Key_Equals),    LCTRL(Key_1), LCTRL(Key_2), LCTRL(Key_3), LCTRL(Key_4),   LCTRL(Key_5),  LCTRL(Key_Escape),
@@ -214,6 +242,7 @@ KEYMAPS(
           LCTRL(Key_PageDown), LCTRL(Key_PageUp), LCTRL(Key_Enter), LCTRL(Key_Spacebar),
           ShiftToLayer(SYMBOL)
     ),
+
 
   [SYMBOL] =  KEYMAP_STACKED(
           Key_Backtick,  Key_F1,  Key_F2,  Key_F3,  Key_F4,  Key_F5,  M(MACRO_VERSION_INFO),
@@ -239,13 +268,42 @@ KEYMAPS(
           ___, ___, ___, ___,
           ___,
 
-          ___, ___,              Mouse_ScrnL,     Mouse_ScrnR    , ___          , ___,           ___,
+          ___, ___,              ___,             ___,             ___          , ___,           ___,
           ___, Key_mouseWarpEnd, Key_mouseWarpNW, Key_mouseWarpNE, Key_mouseBtnL, Key_mouseBtnR, ___,
                ___,              Key_mouseWarpSW, Key_mouseWarpSE, ___,           ___,           ___,
           ___, ___,              ___,             ___,             ___,           ___,           ___,
           ___, ___, ___, ___,
           ___),
 
+  [WM0] =  KEYMAP_STACKED (
+          ___, ___, ___,        ___,       ___,         ___, ___,
+          ___, ___, Key_WsLeft, ___,       Key_WsRight, ___, ___,
+          ___, ___, Key_WmLeft, OSL(WM1),  Key_WmRight, ___,
+          ___, ___, ___,        ___,       ___,         ___, ___,
+          ___, ___, ___,        ___,
+          ___,
+
+          ___, ___, ___, ___, ___, ___, ___,
+          ___, ___, ___, ___, ___, ___, ___,
+               ___, ___, ___, ___, ___, ___,
+          ___, ___, ___, ___, ___, ___, ___,
+          ___, ___, ___, ___,
+          ___),
+
+  [WM1] =  KEYMAP_STACKED (
+          ___, ___, ___,        ___,        ___,        ___, ___,
+          ___, ___, ___,        Key_WmMaxT, ___,        ___, ___,
+          ___, ___, Key_WmMaxL, ___,        Key_WmMaxR, ___,
+          ___, ___, ___,        ___,        ___,        ___, ___,
+          ___, ___, ___,        ___,
+          ___,
+
+          ___, ___, ___, ___, ___, ___, ___,
+          ___, ___, ___, ___, ___, ___, ___,
+               ___, ___, ___, ___, ___, ___,
+          ___, ___, ___, ___, ___, ___, ___,
+          ___, ___, ___, ___,
+          ___),
 
   // Template
   // [LAYER_NAME] =  KEYMAP_STACKED
@@ -476,6 +534,8 @@ KALEIDOSCOPE_INIT_PLUGINS(
   // same time.
   MagicCombo,
 
+  OneShot,
+
   // The USBQuirks plugin lets you do some things with USB that we aren't
   // comfortable - or able - to do automatically, but can be useful
   // nevertheless. Such as toggling the key report protocol between Boot (used
@@ -509,7 +569,7 @@ void setup() {
   // many editable layers we have (see above).
   // ColormapEffect.max_layers(5);
 
-  Qukeys.setOverlapThreshold(50);
+  Qukeys.setOverlapThreshold(80);
 }
 
 /** loop is the second of the standard Arduino sketch functions.
